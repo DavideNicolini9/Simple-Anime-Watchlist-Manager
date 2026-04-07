@@ -5,6 +5,7 @@ import sys
 import msvcrt
 
 table_name = 'ANIME' 
+normal_flag = False;  #set to True for normal operation, False to bypass and test dedicated functions
 
 """
 To create .exe from this code:
@@ -114,7 +115,7 @@ def main_screen(l):
     cursor = l[0]
     conn = l[1]
 
-    while(True):
+    while(normal_flag):
         clear_screen()
         print("=== ANIME TRACKER MENU ===")
         print("1. Add new")
@@ -156,6 +157,10 @@ def main_screen(l):
                 time.sleep(1)
                 clear_screen()
                 break
+    """
+    add below function to test
+    """
+
 
 def get_key():
         key = msvcrt.getch()
