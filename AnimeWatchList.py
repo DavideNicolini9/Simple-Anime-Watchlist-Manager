@@ -2,6 +2,7 @@ import sqlite3
 import os
 import time
 import sys
+import msvcrt
 
 table_name = 'ANIME' 
 
@@ -156,8 +157,54 @@ def main_screen(l):
                 clear_screen()
                 break
 
+def get_key():
+        key = msvcrt.getch()
+        if key in (b'\xe0', b'\x00'): # Arrow key prefix
+            key = msvcrt.getch()
+            if key == b'H': return 'up'
+            if key == b'P': return 'down'
+        elif key == b'\r': return 'enter'
+        elif key.lower() == b'q': return 'q'
+        elif key.lower() == b'w': return 'up'
+        elif key.lower() == b's': return 'down'
+        return None
+
+def moving(cursor, conn):
+    current_idx = 1
+    window_size = 50 # max anime to display in one page
+
+    cursor.execute('SELECT id, title, status FROM anime')
+    results = cursor.fetchall()
+    output = f''
+    
+    while(True):
+        print(f'   {str():<10}{"Title":<50}{"Status"} \n')
+
+        start_idx = current_idx
+        end_idx = window_size
+    
+        for row in results:
+            pointer = "->" if row[0] == current_idx else "  "
+            print(f'{pointer}ID {str(row[0]):<10}{str(row[1]):<50}{row[2]}')
+            
+        print(f'\033[H\033[2K', end='')
+
+        key = get_key()
+        if key == 'up':
+            current_idx -= 1
+        elif key == 'down':
+            current_idx += 1
+        elif key == 'enter':
+            return str(results[current_idx-1][0]) # Return the ID as a string
+        
+        if current_idx <= 0:
+            current_idx = len(results)
+        elif current_idx > len(results):
+            current_idx = 1
+
 def update(cursor, conn):
-    id = input('Insert ID of the anime to modify: ')
+    id = moving(cursor, conn)
+    
     while(True):
         clear_screen()
         print('What do you want to change? \n')
