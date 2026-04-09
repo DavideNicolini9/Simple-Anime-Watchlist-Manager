@@ -238,6 +238,7 @@ def selection_update_menu(cursor, conn):
 def update(cursor, conn):
     id = selection_update_menu(cursor, conn)
     options = ["title", "season", "status", "episode", "exit"]
+    last = '#'
     clear_screen()
 
     while(True):
@@ -252,6 +253,7 @@ def update(cursor, conn):
                 WHERE id = ?''',
                 (title.strip(), id.strip())
             )
+
         elif update == options[1]:
             clear_screen()
             season = input('Update season: ')
@@ -261,15 +263,24 @@ def update(cursor, conn):
                 WHERE id = ?''',
                 (season.strip(), id.strip())
             )
+
         elif update == options[2]:
             clear_screen()
             status = input('Update status: ')
             cursor.execute('''
                 UPDATE ANIME 
-                SET status = ? 
+                SET status = ?
                 WHERE id = ?''',
-                (status.strip(), id.strip())
+                (status.strip(),id.strip())
             )
+            if status == 'finished':
+                cursor.execute('''
+                    UPDATE ANIME
+                    SET last = ?
+                    WHERE id = ?''',
+                    ('#',id.strip())
+                )
+
         elif update == options[3]:
             clear_screen()
             cursor.execute('''
@@ -278,8 +289,8 @@ def update(cursor, conn):
                 (id.strip(),)
             )
             status = cursor.fetchone()
-            if status == 'finished':
-                last = '#'
+            if status[0] == 'finished':
+                print("current status is finished..can't update last episode.. \n")
             else:
                 last = input('Update last ep.: ')
             cursor.execute('''
@@ -288,6 +299,7 @@ def update(cursor, conn):
                 WHERE id = ?''',
                 (last.strip(), id.strip())
             )
+            
         elif update == options[4]:
             clear_screen()
             break
