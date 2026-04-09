@@ -127,53 +127,68 @@ def clear_screen():
     else:
         os.system('clear')
 
+def selection(options, title):
+    current_idx = 0
+    clear_screen()
+    while(True):
+        print(title)
+        for row in enumerate(options):
+            pointer = "->" if row[0] == current_idx  else "  "
+            print(f'{pointer} {row[1]}')
+            
+        print(f'\033[H\033[2K', end='')
+
+        key = get_key()
+        if key == 'up':
+            current_idx -= 1
+        elif key == 'down':
+            current_idx += 1
+        elif key == 'enter':
+            return options[current_idx]
+        elif key == 'q':
+            clear_screen()
+            exit()
+        
+        if current_idx < 0:
+            current_idx = len(options)-1
+        elif current_idx >= len(options):
+            current_idx = 0
+
 def main_screen(l):
     cursor = l[0]
     conn = l[1]
+    options = ["Add new", "Show all", "Show finished", "Show on-going", "Update", "Exit"]
+    clear_screen()
 
     while(True):
-        clear_screen()
-        print("=== ANIME TRACKER MENU ===")
-        print("1. Add new")
-        print("2. Show all")
-        print("3. Show finished")
-        print("4. Show on-going")
-        print("5. Update")
-        print("6. Exit")
-        print("==========================")
-        print("\n\n")
-
-        choice = int(input('Select options:'))
-
-        match choice:
-            case 1:
+        choice = selection(options, "=== ANIME TRACKER MENU ===")
+    
+        if choice == options[0]:
                 clear_screen()
                 add_new_anime(cursor, conn)
                 input('\nPress any key to return to menu....')
-            case 2:
+        elif choice == options[1]:
                 clear_screen()
                 show_all_anime(cursor, conn)
                 input('\nPress any key to return to menu....')
-            case 3:
+        elif choice == options[2]:
                 clear_screen()
                 show_finished(cursor, conn)
                 input('\nPress any key to return to menu....')
-            case 4:
+        elif choice == options[3]:
                 clear_screen()
                 show_ongoing(cursor, conn)
                 input('\nPress any key to return to menu....')
-            case 5:
+        elif choice == options[4]:
                 clear_screen()
                 update(cursor, conn)
-                input('\nPress any key to return to menu....')
-            case 6:
+        elif choice == options[5]:
                 clear_screen()
                 print('closing....')
                 conn.close()
                 time.sleep(1)
                 clear_screen()
                 break
-
 
 def get_key():
         key = msvcrt.getch()
@@ -187,7 +202,7 @@ def get_key():
         elif key.lower() == b's': return 'down'
         return None
 
-def moving(cursor, conn):
+def selection_update_menu(cursor, conn):
     current_idx = 1
     window_size = 50 # max anime to display in one page
 
@@ -221,106 +236,66 @@ def moving(cursor, conn):
             current_idx = 1
 
 def update(cursor, conn):
-    id = moving(cursor, conn)
-    
-    while(True):
-        clear_screen()
-        print('What do you want to change? \n')
-        print('-> 1. title\n')
-        print('-> 2. season\n')
-        print('-> 3. status\n')
-        print('-> 4. episode\n')
-        print('-> 5. exit\n')
-        update = int(input(':::: '))
+    id = selection_update_menu(cursor, conn)
+    options = ["title", "season", "status", "episode", "exit"]
+    clear_screen()
 
-        match update:
-            case 1:
-                title = input('Update title: ')
-                cursor.execute('''
-                    UPDATE ANIME 
-                    SET title = ? 
-                    WHERE id = ?''',
-                    (title.strip(), id.strip())
-                )
-            case 2:
-                season = input('Update season: ')
-                cursor.execute('''
-                    UPDATE ANIME 
-                    SET season = ? 
-                    WHERE id = ?''',
-                    (season.strip(), id.strip())
-                )
-            case 3:
-                status = input('Update status: ')
-                cursor.execute('''
-                    UPDATE ANIME 
-                    SET status = ? 
-                    WHERE id = ?''',
-                    (status.strip(), id.strip())
-                )
-            case 4:
-                cursor.execute('''
-                    SELECT status FROM ANIME
-                    WHERE id = ?''',
-                    (id.strip(),)
-                )
-                status = cursor.fetchone()
-                if status == 'finished':
-                    last = '#'
-                else:
-                    last = input('Update last ep.: ')
-                cursor.execute('''
-                    UPDATE ANIME 
-                    SET last = ? 
-                    WHERE id = ?''',
-                    (last.strip(), id.strip())
-                )
-            case 5:
-                break
+    while(True):
+        update = selection(options,'What do you want to change? \n')
+
+        if update == options[0]:
+            clear_screen()
+            title = input('Update title: ')
+            cursor.execute('''
+                UPDATE ANIME 
+                SET title = ? 
+                WHERE id = ?''',
+                (title.strip(), id.strip())
+            )
+        elif update == options[1]:
+            clear_screen()
+            season = input('Update season: ')
+            cursor.execute('''
+                UPDATE ANIME 
+                SET season = ? 
+                WHERE id = ?''',
+                (season.strip(), id.strip())
+            )
+        elif update == options[2]:
+            clear_screen()
+            status = input('Update status: ')
+            cursor.execute('''
+                UPDATE ANIME 
+                SET status = ? 
+                WHERE id = ?''',
+                (status.strip(), id.strip())
+            )
+        elif update == options[3]:
+            clear_screen()
+            cursor.execute('''
+                SELECT status FROM ANIME
+                WHERE id = ?''',
+                (id.strip(),)
+            )
+            status = cursor.fetchone()
+            if status == 'finished':
+                last = '#'
+            else:
+                last = input('Update last ep.: ')
+            cursor.execute('''
+                UPDATE ANIME 
+                SET last = ? 
+                WHERE id = ?''',
+                (last.strip(), id.strip())
+            )
+        elif update == options[4]:
+            clear_screen()
+            break
 
         conn.commit()
-        input('press any key...')
+        if update != options[4]:
+            input('press any key...')
 
-def txt_to_db(l, filename):
-    cursor = l[0]
-    conn = l[1]
-    print("Starting migration...\n")
-    with open(filename, 'r', encoding='utf-8') as file:
-        for line in file:
-            line = line.strip()
-            # Skip empty lines or lines without our arrow separator
-            if not line or '->' not in line:
-                continue
-            
-            # Split the line wherever there is a '->'
-            parts = line.split('->')
-            
-            # 1. Extract the Title (First part)
-            title = parts[0].strip()
-            
-            
-            # 2. Extract the Status (Second part)
-            status = parts[1].strip()
-            
-            # 3. Extract the Season/Last Ep (Third part, ONLY if it exists)
-
-            season = parts[2].strip()
-
-            last = '#'
-                
-            # Insert into the database
-            try:
-                # We are inserting the 'season' into your 'last' column
-                cursor.execute('''
-                    INSERT INTO anime (title, season, status, last) 
-                    VALUES (?, ?, ?, ?)
-                ''', (title, season, status, last))
-            except sqlite3.IntegrityError:
-                print(f"Skipped: '{title}' (Already in database)")
-                
-    conn.commit()
-    conn.close()
-    print("\n--- Migration Complete! ---")
 
 
 if __name__ == '__main__':
@@ -331,4 +306,5 @@ if __name__ == '__main__':
         add below function to test
         """
        
+
              
