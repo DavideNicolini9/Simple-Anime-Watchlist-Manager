@@ -3,9 +3,11 @@ import os
 import time
 import sys
 import msvcrt
+import glob
 
+DB_NAME = 'AnimeWatchList'
 table_name = 'ANIME' 
-normal_flag = False;  #set to True for normal operation, False to bypass and test dedicated functions
+normal_flag = True;  #set to True for normal operation, False to bypass and test dedicated functions
 
 """
 To create .exe from this code:
@@ -32,6 +34,20 @@ def create_db(db_name):
     conn.close()
 
 def __init__():
+    file = glob.glob("*.db") #find if there is a .db file in the folder
+    try:
+        test = file[0] #test operation to se if "file" is empty
+    except IndexError:
+        print("Anime list database not found.. \n")
+        s = input("You want to create a new one? (Y/n) ::: ")
+        if s == "Y" or s == "y":
+            create_db(DB_NAME)  #create database
+        else:
+            print("please place the .db file in the same folder as the .exe and retry...")
+            input() #press any key to abort the execution
+            exit() #abort the execution
+            
+
     if getattr(sys, 'frozen', False):
         current_dir = os.path.dirname(sys.executable) #for when running as .exe
     else:
@@ -115,7 +131,7 @@ def main_screen(l):
     cursor = l[0]
     conn = l[1]
 
-    while(normal_flag):
+    while(True):
         clear_screen()
         print("=== ANIME TRACKER MENU ===")
         print("1. Add new")
@@ -157,9 +173,6 @@ def main_screen(l):
                 time.sleep(1)
                 clear_screen()
                 break
-    """
-    add below function to test
-    """
 
 
 def get_key():
@@ -308,9 +321,14 @@ def txt_to_db(l, filename):
     conn.commit()
     conn.close()
     print("\n--- Migration Complete! ---")
-#def update(db_name):
+
 
 if __name__ == '__main__':
-    # create_db('AnimeWatchList')
-    # txt_to_db(__init__(), 'Anime(late).txt')
-    main_screen(__init__())
+    if normal_flag == True:
+        main_screen(__init__())
+    else:
+        """
+        add below function to test
+        """
+       
+             
