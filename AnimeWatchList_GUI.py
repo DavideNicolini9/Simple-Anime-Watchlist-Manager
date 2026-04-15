@@ -7,6 +7,13 @@ from tkinter import ttk, messagebox
 DB_NAME = 'AnimeWatchList'
 TABLE_NAME = 'ANIME'
 
+"""
+To create .exe from this code:
+- open cmd in the same directory of this code
+- run "pyinstaller --onefile --windowed <file name>.py"
+- extract the .exe and put it in the same directory of the .db
+"""
+
 def setup_db():
     """Checks for the database, creates it if it doesn't exist, and returns the connection."""
     # Create the database and table if they don't exist
