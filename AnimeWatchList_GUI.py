@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import sys
 import glob
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -10,7 +11,12 @@ TABLE_NAME = 'ANIME'
 """
 To create .exe from this code:
 - open cmd in the same directory of this code
-- run "pyinstaller --onefile --windowed <file name>.py"
+- run "auto-py-to-exe" (if not installed "pip install auto-py-to-exe")
+- select the script
+- select "One file"
+- in the Icon menu, select .ico file
+- in the Additional Files menu, add the path of the .ico
+- clik on the "Convert .py to .exe" tab
 - extract the .exe and put it in the same directory of the .db
 """
 
@@ -31,6 +37,17 @@ def setup_db():
     conn.commit()
     return conn
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        # If we are not running as a .exe, just look in the current folder
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 class AnimeTrackerApp:
     def __init__(self, root, conn):
         self.root = root
@@ -40,6 +57,8 @@ class AnimeTrackerApp:
         # Configure Main Window
         self.root.title("Anime Tracker")
         self.root.geometry("750x450")
+        icon_path = resource_path('ramen.ico')
+        self.root.iconbitmap(icon_path)
         
         # --- UI Setup ---
         
