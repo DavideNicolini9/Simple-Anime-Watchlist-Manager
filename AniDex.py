@@ -8,18 +8,6 @@ from tkinter import ttk, messagebox
 DB_NAME = 'AnimeWatchList'
 TABLE_NAME = 'ANIME'
 
-"""
-To create .exe from this code:
-- open cmd in the same directory of this code
-- run "auto-py-to-exe" (if not installed "pip install auto-py-to-exe")
-- select the script
-- select "One file"
-- in the Icon menu, select .ico file
-- in the Additional Files menu, add the path of the .ico
-- clik on the "Convert .py to .exe" tab
-- extract the .exe and put it in the same directory of the .db
-"""
-
 def setup_db():
     """Checks for the database, creates it if it doesn't exist, and returns the connection."""
     # Create the database and table if they don't exist
