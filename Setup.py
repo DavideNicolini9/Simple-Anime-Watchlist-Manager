@@ -92,7 +92,7 @@ class SetupWizard(tk.Tk):
             self.btn_next.pack_forget()
             self.btn_back.pack_forget()
             self.btn_cancel.pack_forget()
-            self.btn_exit = tk.Button(btn_frame, text="Exit", width=10, command=self.quit)
+            self.btn_exit = tk.Button(btn_frame, text="Exit", width=10, command=self.destroy)
             self.btn_exit.pack(side=tk.LEFT, padx=2)
 
         # --- Main Content Area ---
@@ -203,9 +203,6 @@ class SetupWizard(tk.Tk):
         folder = filedialog.askdirectory(initialdir=self.install_path.get())
         if folder:
             self.install_path.set(folder)
-
-    def quit(self):
-            quit()
 
     def go_back(self):
         if self.current_step == 1:
