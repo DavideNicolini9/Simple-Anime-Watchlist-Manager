@@ -51,7 +51,18 @@ class SetupWizard(tk.Tk):
         except Exception:
             pass
 
+
         self.current_step = 0
+
+        try:
+            flag = False
+            start_menu_dir = os.path.join(os.environ["APPDATA"], r"Microsoft\Windows\Start Menu\Programs\AniDex")
+            check = os.listdir(start_menu_dir)
+            for i in check:
+                if i == "AniDex.lnk":
+                    flag = True
+        except:
+            pass
         
         # Set default path to C:\Program Files (x86)\AnimeTracker
         default_dir = os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")
@@ -67,6 +78,7 @@ class SetupWizard(tk.Tk):
         btn_frame = tk.Frame(self.bottom_frame)
         btn_frame.pack(side=tk.RIGHT, padx=15, pady=(0, 15))
         
+
         self.btn_back = tk.Button(btn_frame, text="< Back", width=10, command=self.go_back)
         self.btn_back.pack(side=tk.LEFT, padx=2)
         
@@ -76,22 +88,47 @@ class SetupWizard(tk.Tk):
         self.btn_cancel = tk.Button(btn_frame, text="Cancel", width=10, command=self.destroy)
         self.btn_cancel.pack(side=tk.LEFT, padx=(10, 0))
 
+        if flag == True:
+            self.btn_next.pack_forget()
+            self.btn_back.pack_forget()
+            self.btn_cancel.pack_forget()
+            self.btn_exit = tk.Button(btn_frame, text="Exit", width=10, command=self.quit)
+            self.btn_exit.pack(side=tk.LEFT, padx=2)
+
         # --- Main Content Area ---
         self.container = tk.Frame(self)
         self.container.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         
         self.pages = {}
+        self.create_already_installed_page()
         self.create_welcome_page()
         self.create_path_page()
         self.create_install_page()
         self.create_finish_page()
         
-        self.show_page("Welcome")
+        
+        if flag == False:
+            self.show_page("Welcome")
+        else:
+            self.show_page("Checking")
+        
 
     def show_page(self, page_name):
         for frame in self.pages.values():
             frame.pack_forget()
         self.pages[page_name].pack(fill=tk.BOTH, expand=True)
+
+    def create_already_installed_page(self):
+        frame = tk.Frame(self.container, bg="white")
+        self.pages["Checking"] = frame
+        sidebar = tk.Frame(frame, bg="#000080", width=160)
+        sidebar.pack(side=tk.LEFT, fill=tk.Y)
+        sidebar.pack_propagate(False)
+        right_area = tk.Frame(frame, bg="white")
+        right_area.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        tk.Label(right_area, text="Welcome to the Anime Tracker\nSetup Wizard", font=("Arial", 14, "bold"), bg="white", justify=tk.LEFT, anchor="w").pack(fill=tk.X, pady=(0, 20))
+        tk.Label(right_area, text="Seems like the software is already installed.\n\nClick Exit to continue.", font=("Arial", 9), bg="white", justify=tk.LEFT, wraplength=300).pack(fill=tk.X)
 
     # --- Page 1: Welcome ---
     def create_welcome_page(self):
@@ -166,6 +203,9 @@ class SetupWizard(tk.Tk):
         folder = filedialog.askdirectory(initialdir=self.install_path.get())
         if folder:
             self.install_path.set(folder)
+
+    def quit(self):
+            quit()
 
     def go_back(self):
         if self.current_step == 1:
